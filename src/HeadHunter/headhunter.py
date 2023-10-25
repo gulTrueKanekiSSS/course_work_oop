@@ -1,6 +1,6 @@
 import requests
-from src.Implemented.implemented import save_data_to_json, convert_valutes, top_salary
-
+from src.Implemented.implemented import save_data_to_json, convert_valutes_hh, top_salary_hh
+from src.Vacancie.vacancie import Vacancie
 
 class VacanciesHeadHunterApi:
 
@@ -15,10 +15,7 @@ class VacanciesHeadHunterApi:
 
     @property
     def platform(self):
-        if self._platform not in ["hh.ru", "superjob"]:
-            raise ValueError("Неверное название платформы")
-        else:
-            return self._platform
+        return self._platform
 
     def return_data_hh_ru(self):
         params = {
@@ -43,17 +40,17 @@ class VacanciesHeadHunterApi:
         data = self.filtered_salary_data()
         for item in data:
             if item['salary']['from'] is None and item['salary']['to'] is not None:
-                item['salary']['to'] = convert_valutes(item['salary']['currency'], item['salary']['to'])
+                item['salary']['to'] = convert_valutes_hh(item['salary']['currency'], item['salary']['to'])
                 item['salary']['currency'] = 'RUR'
             elif item['salary']['from'] is not None and item['salary']['to'] is None:
-                item['salary']['from'] = convert_valutes(item['salary']['currency'], item['salary']['from'])
+                item['salary']['from'] = convert_valutes_hh(item['salary']['currency'], item['salary']['from'])
                 item['salary']['currency'] = 'RUR'
             else:
                 continue
         return data
 
     def return_top_vacancies(self):
-        return top_salary(self.rubles_salary(), self.amount)
+        return top_salary_hh(self.rubles_salary(), self.amount)
 
 
 class DataVacancies(VacanciesHeadHunterApi):
@@ -73,14 +70,5 @@ class DataVacancies(VacanciesHeadHunterApi):
 class SaveVacancies(VacanciesHeadHunterApi):
 
     def save_to_json(self):
-        save_data_to_json(self.return_data_hh_ru())
+        save_data_to_json(self.return_top_vacancies())
 
-
-class Vacancie(VacanciesHeadHunterApi):
-
-    def __init__(self, search_request, platform, amount, name, salary, url, requirement):
-        super().__init__(search_request, platform, amount)
-        self.name = name
-        self.salary = salary
-        self.url = url
-        self.requirement = requirement

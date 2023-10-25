@@ -1,4 +1,11 @@
 import json
+import os
+
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv('API_KEY')
+
 
 
 def save_data_to_json(data, filename='jobs.json'):
@@ -11,7 +18,7 @@ def save_data_to_json(data, filename='jobs.json'):
         print(f'Произошла ошибка при сохранении данных: {str(e)}')
 
 
-def convert_valutes(currency, to):
+def convert_valutes_hh(currency, to):
     currrency_to_rubles = {
         'EUR': 100,
         'USD': 100,
@@ -27,9 +34,24 @@ def convert_valutes(currency, to):
 
     return to * currrency_to_rubles.get(currency)
 
+def convert_valutes_super(currency, to):
+    currrency_to_rubles = {
+        'rub': 1,
+        'uah': 2.62,
+        'uzs': 0.0078
+    }
 
-def top_salary(data, amount: int):
+    return to * currrency_to_rubles.get(currency)
+
+
+def top_salary_hh(data, amount: int):
 
     sorted_data = sorted(data, key=lambda item: item.get('salary').get('to') if item.get('salary').get('to') is not None else item.get('salary').get('from'))
+
+    return sorted_data[:amount]
+
+def top_salary_super(data, amount: int):
+
+    sorted_data = sorted(data, key=lambda item: item.get('payment_to') if item.get('payment_to') is not None else item.get('payment_from'))
 
     return sorted_data[:amount]
