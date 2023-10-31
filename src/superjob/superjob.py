@@ -1,18 +1,17 @@
 import requests
 
 from src.abstract_class import Job
-from src.Implemented.implemented import api_key, convert_valutes_super, top_salary_super
-from src.Vacancie.vacancie import Vacancie
+from src.implemented.implemented import api_key, convert_valutes_super, top_salary_super, save_data_to_json, get_json_data
+from src.vacancie.vacancie import Vacancie
 
 class VacanciesSuperJob(Job):
     def __init__(self, platform, search_request, amount):
         self.platform = platform
         self.search_request = search_request
         self.amount = amount
-        self.__vacancies = self.get_vacancies()
+        self.save = self.get_vacancies_and_save()
 
-
-    def get_vacancies(self):
+    def get_vacancies_and_save(self):
 
         headers = {
             'X-Api-App-Id': api_key
@@ -27,7 +26,12 @@ class VacanciesSuperJob(Job):
             headers=headers,
             params=params
         ).json()['objects']
+        save_data_to_json(vacancies, 'superjob')
         return vacancies
+
+    def get_vacancies(self):
+        data = get_json_data('superjob')
+        return data
 
     def initialization_vacancie_class(self):
         items = []

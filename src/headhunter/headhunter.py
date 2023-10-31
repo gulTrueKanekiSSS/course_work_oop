@@ -1,6 +1,6 @@
 import requests
-from src.Implemented.implemented import save_data_to_json, convert_valutes_hh, top_salary_hh
-from src.Vacancie.vacancie import Vacancie
+from src.implemented.implemented import save_data_to_json, convert_valutes_hh, top_salary_hh, get_json_data
+from src.vacancie.vacancie import Vacancie
 
 class VacanciesHeadHunterApi:
 
@@ -8,6 +8,7 @@ class VacanciesHeadHunterApi:
         self._platform = platform
         self._search_request = search_request
         self.amount = amount
+        self.save = self.get_data_hh_ru_and_save()
 
     @property
     def search_request(self):
@@ -17,11 +18,16 @@ class VacanciesHeadHunterApi:
     def platform(self):
         return self._platform
 
-    def return_data_hh_ru(self):
+    def get_data_hh_ru_and_save(self):
         params = {
             'text': self.search_request
         }
         data = requests.get("https://api.hh.ru/vacancies", params=params).json()
+        save_data_to_json(data, 'hh')
+        return data
+
+    def return_data_hh_ru(self):
+        data = get_json_data('hh')
         return data
 
     def return_data_hh_ru_items(self):
@@ -67,8 +73,8 @@ class DataVacancies(VacanciesHeadHunterApi):
         return items
 
 
-class SaveVacancies(VacanciesHeadHunterApi):
-
-    def save_to_json(self):
-        save_data_to_json(self.return_top_vacancies())
+# class SaveVacancies(VacanciesHeadHunterApi):
+#
+#     def save_to_json(self):
+#         save_data_to_json(self.return_data_hh_ru())
 

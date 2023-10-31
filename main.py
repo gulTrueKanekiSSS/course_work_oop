@@ -1,5 +1,5 @@
-from src.HeadHunter.headhunter import VacanciesHeadHunterApi, DataVacancies
-from src.SuperJob.superjob import VacanciesSuperJob
+from src.headhunter.headhunter import VacanciesHeadHunterApi
+from src.superjob.superjob import VacanciesSuperJob
 
 
 def user_interface(platform, search_request, amount):
