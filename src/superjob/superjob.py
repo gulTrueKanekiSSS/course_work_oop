@@ -9,22 +9,20 @@ class VacanciesSuperJob(Job):
         self.platform = platform
         self.search_request = search_request
         self.amount = amount
+        self.headers = {
+            'X-Api-App-Id': api_key
+        }
+        self.params = {
+            'keywords': self.search_request,
+        }
         self.save = self.get_vacancies_and_save()
 
     def get_vacancies_and_save(self):
 
-        headers = {
-            'X-Api-App-Id': api_key
-        }
-
-        params = {
-            'keywords': self.search_request
-        }
-
         vacancies = requests.get(
             'https://api.superjob.ru/2.0/vacancies/',
-            headers=headers,
-            params=params
+            headers=self.headers,
+            params=self.params
         ).json()['objects']
         save_data_to_json(vacancies, 'superjob')
         return vacancies

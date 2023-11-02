@@ -5,24 +5,25 @@ from src.vacancie.vacancie import Vacancie
 class VacanciesHeadHunterApi:
 
     def __init__(self, platform: str, search_request: str, amount: int):
-        self._platform = platform
-        self._search_request = search_request
+        self.__platform = platform
+        self.__search_request = search_request
         self.amount = amount
+        self.params = {
+            'text': self.search_request,
+            'only_with_salary': 'true'
+        }
         self.save = self.get_data_hh_ru_and_save()
 
     @property
     def search_request(self):
-        return self._search_request
+        return self.__search_request
 
     @property
     def platform(self):
-        return self._platform
+        return self.__platform
 
     def get_data_hh_ru_and_save(self):
-        params = {
-            'text': self.search_request
-        }
-        data = requests.get("https://api.hh.ru/vacancies", params=params).json()
+        data = requests.get("https://api.hh.ru/vacancies", params=self.params).json()
         save_data_to_json(data, 'hh')
         return data
 
@@ -33,17 +34,9 @@ class VacanciesHeadHunterApi:
     def return_data_hh_ru_items(self):
         return self.return_data_hh_ru()['items']
 
-    def filtered_salary_data(self):
-        filtered_data = []
-        for item in self.return_data_hh_ru_items():
-            if item.get("salary") is None:
-                continue
-            else:
-                filtered_data.append(item)
-        return filtered_data
 
     def rubles_salary(self):
-        data = self.filtered_salary_data()
+        data = self.return_data_hh_ru_items()
         for item in data:
             if item['salary']['from'] is None and item['salary']['to'] is not None:
                 item['salary']['to'] = convert_valutes_hh(item['salary']['currency'], item['salary']['to'])
@@ -64,7 +57,7 @@ class DataVacancies(VacanciesHeadHunterApi):
     def objects(self) -> list:
         items = []
         for item in self.return_data_hh_ru()["items"]:
-            vacancie = Vacancie(self._platform, self._search_request, self.amount,
+            vacancie = Vacancie(self.platform, self.search_request, self.amount,
                                 name=item.get('name'),
                                 salary=item.get('salary').get('from'),
                                 url=item.get('url'),
@@ -72,9 +65,4 @@ class DataVacancies(VacanciesHeadHunterApi):
             items.append(vacancie)
         return items
 
-
-# class SaveVacancies(VacanciesHeadHunterApi):
-#
-#     def save_to_json(self):
-#         save_data_to_json(self.return_data_hh_ru())
 

@@ -6,7 +6,8 @@ def user_interface(platform, search_request, amount):
 
     if platform == 'hh.ru':
         obj = VacanciesHeadHunterApi(platform, search_request, amount)
-        return obj.return_top_vacancies()
+        data = obj.return_top_vacancies()
+        return data
 
     elif platform == 'superjob':
         obj = VacanciesSuperJob(platform, search_request, amount)
