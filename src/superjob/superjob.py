@@ -1,25 +1,30 @@
+from typing import Dict, List
+
 import requests
 
 from src.abstract_class import Job
-from src.implemented.implemented import api_key, convert_valutes_super, top_salary_super, save_data_to_json, get_json_data
+from src.implemented.implemented import api_key, convert_valutes_super, top_salary_super, save_data_to_json, \
+    get_json_data, sort_areas_super
 from src.vacancie.vacancie import Vacancie
 
+
 class VacanciesSuperJob(Job):
-    def __init__(self, platform, search_request, amount):
-        self.platform = platform
-        self.search_request = search_request
-        self.amount = amount
-        self.headers = {
+    def __init__(self, platform: str, search_request: str, amount: int, area=None):
+        self.platform: str = platform
+        self.search_request: str = search_request
+        self.amount: int = amount
+        self.area: str = area
+        self.headers: Dict = {
             'X-Api-App-Id': api_key
         }
-        self.params = {
+        self.params: Dict = {
             'keywords': self.search_request,
         }
-        self.save = self.get_vacancies_and_save()
+        self.save: Dict = self.get_data_and_save()
 
-    def get_vacancies_and_save(self):
+    def get_data_and_save(self) -> Dict:
 
-        vacancies = requests.get(
+        vacancies: Dict = requests.get(
             'https://api.superjob.ru/2.0/vacancies/',
             headers=self.headers,
             params=self.params
@@ -27,16 +32,20 @@ class VacanciesSuperJob(Job):
         save_data_to_json(vacancies, 'superjob')
         return vacancies
 
-    def get_vacancies(self):
-        data = get_json_data('superjob')
-        return data
+    def return_data(self) -> Dict:
+        if self.area is None:
+            data: Dict = get_json_data('superjob')
+            return data
+        else:
+            data: Dict = get_json_data('superjob')
+            return sort_areas_super(data, self.area)
 
-    def initialization_vacancie_class(self):
+    def initialization_vacancie_class(self) -> List[object]:
         items = []
-        for item in self.get_vacancies():
+        for item in self.return_data():
             if item.get('payment_to') is not None and item.get('payment_to') != 0:
 
-                vacancie = Vacancie(
+                vacancie: object = Vacancie(
                     self.search_request,
                     self.platform,
                     self.amount,
@@ -50,7 +59,7 @@ class VacanciesSuperJob(Job):
 
             elif item.get('payment_from') is not None and item.get('payment_from') != 0:
 
-                vacancie = Vacancie(
+                vacancie: object = Vacancie(
                     self.search_request,
                     self.platform,
                     self.amount,
@@ -64,7 +73,7 @@ class VacanciesSuperJob(Job):
 
             else:
 
-                vacancie = Vacancie(
+                vacancie: object = Vacancie(
                     self.search_request,
                     self.platform,
                     self.amount,
@@ -77,8 +86,8 @@ class VacanciesSuperJob(Job):
                 items.append(vacancie)
         return items
 
-    def salary_to_rubles(self):
-        data = self.get_vacancies()
+    def salary_to_rubles(self) -> Dict:
+        data: Dict = self.return_data()
 
         for item in data:
             if item.get('payment_to') is not None and item.get('payment_to') != 0:
@@ -96,5 +105,5 @@ class VacanciesSuperJob(Job):
                 item['currency'] = 'rub'
         return data
 
-    def top_vacancies(self):
+    def return_top_vacancies(self) -> Dict:
         return top_salary_super(self.salary_to_rubles(), self.amount)
